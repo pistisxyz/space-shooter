@@ -14,6 +14,7 @@ const speed = 10;
 let timeElapsed = 0;
 let shootCD = false;
 let score = 0;
+let oldPointer = { x: 0, y: 0 };
 
 const SPAWN = 'spawn';
 const POSITION = 'position';
@@ -23,7 +24,7 @@ const HIT = 'hit';
 
 // Connection opened
 socket.addEventListener('open', () => {
-  socket.send(JSON.stringify({ type: SPAWN, x: ship.x, y: ship.y }));
+  socketSend({ type: SPAWN, x: ship.x, y: ship.y });
   loop.start();
 });
 
@@ -50,6 +51,9 @@ socket.addEventListener('message', (event) => {
       break;
     case BULLET:
       addEnemyBullet(data);
+      break;
+    case POSITION:
+      players[data.id].rotation = data.rotation;
       break;
     default:
       console.warn('Unknown signal:', data.type);
@@ -141,32 +145,31 @@ function shoot() {
   });
   bullets.push(bullet);
 
-  socket.send(
-    JSON.stringify({
-      type: BULLET,
-      bullet: {
-        x: bullet.x,
-        y: bullet.y,
-        dir,
-      },
-    })
-  );
+  socketSend({
+    type: BULLET,
+    bullet: {
+      x: bullet.x,
+      y: bullet.y,
+      dir,
+    },
+  });
 }
 
 kontra.initPointer();
 kontra.initKeys();
 kontra.initInput();
 
-// TODO: disconnect rotation from position or check for rotation changes
 function sendPosition() {
-  socket.send(
-    JSON.stringify({
-      type: POSITION,
-      rotation: ship.rotation,
-      x: ship.x,
-      y: ship.y,
-    })
-  );
+  socketSend({
+    type: POSITION,
+    rotation: ship.rotation,
+    x: ship.x,
+    y: ship.y,
+  });
+}
+
+function socketSend(data) {
+  socket.send(JSON.stringify(data));
 }
 
 let scoreText = kontra.Text({
@@ -176,12 +179,9 @@ let scoreText = kontra.Text({
   y: 10,
 });
 
-let mouseDown
+let mouseDown = 0;
 document.body.onmousedown = () => mouseDown++;
 document.body.onmouseup = () => mouseDown--;
-
-// TODO: send position only when moving
-kontra.on('tick', sendPosition);
 
 var loop = kontra.GameLoop({
   update: (delta) => {
@@ -190,15 +190,19 @@ var loop = kontra.GameLoop({
 
     if (kontra.keyPressed('w')) {
       if (ship.y > 10) ship.y -= speed;
+      sendPosition();
     }
     if (kontra.keyPressed('s')) {
       if (ship.y < canvas.height - 10) ship.y += speed;
+      sendPosition();
     }
     if (kontra.keyPressed('d')) {
       if (ship.x < canvas.width - 10) ship.x += speed;
+      sendPosition();
     }
     if (kontra.keyPressed('a')) {
       if (ship.x > 10) ship.x -= speed;
+      sendPosition();
     }
 
     if (kontra.keyPressed('space') || mouseDown) {
@@ -211,7 +215,11 @@ var loop = kontra.GameLoop({
       }
     }
 
-    ship.rotation = Math.atan2(pointer.y - ship.y, pointer.x - ship.x);
+    if (oldPointer.x != pointer.x || oldPointer.y != pointer.y) {
+      ship.rotation = Math.atan2(pointer.y - ship.y, pointer.x - ship.x);
+      sendPosition();
+    }
+
     if (canvas.width < ship.x) {
       ship.x = -20;
     }
@@ -251,6 +259,9 @@ var loop = kontra.GameLoop({
       scoreText.text = score;
       scoreText.update();
     }
+
+    oldPointer.x = pointer.x;
+    oldPointer.y = pointer.y;
   },
   render: () => {
     for (let player of Object.values(players)) {

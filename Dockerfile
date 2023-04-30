@@ -12,4 +12,4 @@ RUN pnpm i
 
 EXPOSE 8080
 
-CMD [ "node", "server/main.js" ]
+CMD [ "pnpm", "start" ]
