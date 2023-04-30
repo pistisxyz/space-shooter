@@ -201,7 +201,7 @@ var loop = kontra.GameLoop({
       sendPosition();
     }
 
-    if (kontra.keyPressed('space') || mouseDown) {
+    if (kontra.keyPressed('space') || kontra.pointerPressed('left')) {
       if (!shootCD) {
         shoot();
         setTimeout(() => {
