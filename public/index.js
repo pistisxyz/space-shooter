@@ -1,9 +1,9 @@
 /// <reference path="./kontra.js"/>
 import '/kontra.js';
 
-let { canvas, context } = kontra.init('game');
+let { canvas } = kontra.init('game');
 
-const socket = new WebSocket('ws://ships.megumax.moe:3333');
+const socket = new WebSocket('ws://' + window.location.hostname + ':' + window.location.port + '/ws');
 
 let something = [];
 let players = {};
@@ -41,6 +41,7 @@ socket.addEventListener('message', (event) => {
   switch (data.type) {
     case SPAWN:
       createShip(data.x, data.y, data.id);
+      sendPosition();
       break;
     case POSITION:
       updatePosition(data);
@@ -204,6 +205,7 @@ kontra.initPointer();
 kontra.initKeys();
 kontra.initInput();
 
+// TODO: disconnect rotation from position or check for rotation changes
 function sendPosition() {
   socket.send(
     JSON.stringify({
@@ -222,6 +224,11 @@ let scoreText = kontra.Text({
   y: 10,
 });
 
+let mouseDown
+document.body.onmousedown = () => mouseDown++;
+document.body.onmouseup = () => mouseDown--;
+
+// TODO: send position only when moving
 kontra.on('tick', sendPosition);
 
 var loop = kontra.GameLoop({
@@ -242,8 +249,7 @@ var loop = kontra.GameLoop({
       if (ship.x > 10) ship.x -= speed;
     }
 
-    // TODO: shoot on mouse click
-    if (kontra.keyPressed('space')) {
+    if (kontra.keyPressed('space') || mouseDown) {
       if (!shootCD) {
         shoot();
         setTimeout(() => {
@@ -306,6 +312,16 @@ var loop = kontra.GameLoop({
   },
   blur: true,
 });
+
+// Garbage collection
+setInterval(() => {
+  if (ebullets.length > 1000) {
+    ebullets.filter((a) => a);
+  }
+  if (bullets.length > 100) {
+    bullets.filter((a) => a);
+  }
+}, 60 * 1000);
 
 function outsideCanvas(x, y) {
   return x < 0 || x > canvas.width || y < 0 || y > canvas.height;
