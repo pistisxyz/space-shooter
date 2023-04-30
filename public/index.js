@@ -5,7 +5,6 @@ let { canvas } = kontra.init('game');
 
 const socket = new WebSocket('ws://' + window.location.hostname + ':' + window.location.port + '/ws');
 
-let something = [];
 let players = {};
 let bullets = [];
 let ebullets = [];
@@ -50,7 +49,7 @@ socket.addEventListener('message', (event) => {
       delete players[data.id];
       break;
     case BULLET:
-      updateBullets(data);
+      addEnemyBullet(data);
       break;
     default:
       console.warn('Unknown signal:', data.type);
@@ -94,7 +93,7 @@ function createShip(x, y, id) {
   players[id] = ship;
 }
 
-function updateBullets(data) {
+function addEnemyBullet(data) {
   let { x, y, dir } = data.bullet;
   let [dx, dy] = [Math.cos(dir), Math.sin(dir)];
   let bullet = kontra.Sprite({
@@ -108,53 +107,6 @@ function updateBullets(data) {
     anchor,
   });
   ebullets.push(bullet);
-}
-
-// TODO: dead code
-function createBullet(data) {
-  let { x: px, y: py } = kontra.getPointer();
-  let vec = kontra.Vector(px - ship.x, py - ship.y);
-  let dir = vec.direction();
-  let [dx, dy] = [Math.cos(dir), Math.sin(dir)];
-  let bullet = kontra.Sprite({
-    x: ship.x + dx * 20,
-    y: ship.y + dy * 20,
-    color: 'magenta',
-    height: 5,
-    width: 5,
-    dx: dx * (speed + 1),
-    dy: dy * (speed + 1),
-  });
-  ebullets.push(bullet);
-  console.log(bullet);
-}
-
-// TODO: dead code
-function updateSomethings() {
-  let pointer = kontra.getPointer();
-  something.forEach((ship) => {
-    ship.update();
-
-    if (ship.x < -20 || ship.x > canvas.width) {
-      ship.dx = -ship.dx;
-    }
-    if (ship.y < -20 || ship.y > canvas.height) {
-      ship.dy = -ship.dy;
-    }
-
-    ship.rotation = Math.atan2(pointer.y - ship.y, pointer.x - ship.x);
-
-    // if (ship.x < -20) {
-    //   ship.x = canvas.width;
-    // } else if (ship.x > canvas.width) {
-    //   ship.x = -20;
-    // }
-    // if (ship.y < -20) {
-    //   ship.y = canvas.height;
-    // } else if (ship.y > canvas.height) {
-    //   ship.y = -20;
-    // }
-  });
 }
 
 function createObject(x, y, color, size = { x: 20, y: 20 }) {
