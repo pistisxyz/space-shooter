@@ -1,5 +1,4 @@
 /// <reference path="./kontra.js"/>
-import '/kontra.js';
 
 let { canvas } = kontra.init('game');
 
@@ -10,11 +9,12 @@ let bullets = [];
 let ebullets = [];
 
 const anchor = { x: 0.5, y: 0.5 };
-const speed = 10;
+const speed = 4;
 let timeElapsed = 0;
 let shootCD = false;
 let score = 0;
 let oldPointer = { x: 0, y: 0 };
+let username = localStorage.getItem('username');
 
 const SPAWN = 'spawn';
 const POSITION = 'position';
@@ -179,10 +179,6 @@ let scoreText = kontra.Text({
   y: 10,
 });
 
-let mouseDown = 0;
-document.body.onmousedown = () => mouseDown++;
-document.body.onmouseup = () => mouseDown--;
-
 var loop = kontra.GameLoop({
   update: (delta) => {
     let pointer = kontra.getPointer();
@@ -288,4 +284,10 @@ setInterval(() => {
 
 function outsideCanvas(x, y) {
   return x < 0 || x > canvas.width || y < 0 || y > canvas.height;
+}
+
+function setUsername() {
+  let usernameInput = document.getElementById('username');
+  localStorage.setItem('username', usernameInput.value);
+  username = usernameInput.value;
 }

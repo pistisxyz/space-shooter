@@ -1,0 +1,32 @@
+* {
+  color: #d3d3d3;
+}
+button {
+  color: black;
+}
+html,
+body {
+  background-color: #181a1b;
+}
+canvas {
+  border: #8a8273 4px solid;
+  display: block;
+}
+fieldset {
+  width: fit-content;
+  margin-top: 10px;
+}
+kbd {
+  margin-right: 12px;
+}
+
+.flex {
+  display: flex;
+}
+.field > * {
+  display: block;
+  margin-bottom: 4px;
+}
+.field > *:last-child {
+  margin-bottom: 0;
+}

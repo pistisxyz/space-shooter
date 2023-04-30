@@ -4,40 +4,40 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Space shooter</title>
 
     <script src="https://cdn.jsdelivr.net/npm/kontra@9.0.0/kontra.min.js"></script>
-    <style>
-      html,
-      body {
-        background-color: #181a1b;
-      }
-      canvas {
-        border: #8a8273 4px solid;
-        display: block;
-      }
-      table {
-        color: #d3d3d3;
-      }
-    </style>
+    <link rel="stylesheet" href="style.css">
     <script type="module" defer src="./index.js"></script>
   </head>
   <body>
     <canvas id="game" width="800" height="600"></canvas>
-    <table>
-      <th>Controls</th>
-      <tr>
-        <td>
-          <kbd>wasd</kbd>
-        </td>
-        <td>move</td>
-      </tr>
-      <tr>
-        <td>
-          <kbd>space</kbd>
-        </td>
-        <td>shoot</td>
-      </tr>
-    </table>
+    <div class="flex">
+      <fieldset>
+        <legend>Controls</legend>
+        <table>
+          <tr>
+            <td><kbd>wasd</kbd></td>
+            <td>move</td>
+          </tr>
+          <tr>
+            <td><kbd>space</kbd></td>
+            <td>shoot</td>
+          </tr>
+          <tr>
+            <td><kbd>left mouse</kbd></td>
+            <td>shoot</td>
+          </tr>
+        </table>
+      </fieldset>
+      <fieldset>
+        <legend>User</legend>
+        <form class="field">
+          <label for="username">Name:</label>
+          <input type="text" name="username" id="username">
+          <button onsubmit="setUsername()">OK</button>
+        </form>
+      </fieldset>
+    </div>
   </body>
 </html>
