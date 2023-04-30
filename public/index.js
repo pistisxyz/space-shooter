@@ -215,8 +215,8 @@ var loop = kontra.GameLoop({
       }
     }
 
+    ship.rotation = Math.atan2(pointer.y - ship.y, pointer.x - ship.x);
     if (oldPointer.x != pointer.x || oldPointer.y != pointer.y) {
-      ship.rotation = Math.atan2(pointer.y - ship.y, pointer.x - ship.x);
       sendPosition();
     }
 
