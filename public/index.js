@@ -2,7 +2,8 @@
 
 let { canvas } = kontra.init('game');
 
-const socket = new WebSocket('ws://' + window.location.hostname + ':' + window.location.port + '/ws');
+const WS_URI = `ws://${window.location.hostname}:${window.location.port}/ws`;
+let socket = new WebSocket(WS_URI);
 
 let players = {};
 let bullets = [];
@@ -24,7 +25,7 @@ const HIT = 'hit';
 
 // Connection opened
 socket.addEventListener('open', () => {
-  socketSend({ type: SPAWN, x: ship.x, y: ship.y });
+  socketSend({ type: SPAWN, x: ship.x, y: ship.y, rot: ship.rotation });
   loop.start();
 });
 
@@ -40,7 +41,7 @@ socket.addEventListener('message', (event) => {
 
   switch (data.type) {
     case SPAWN:
-      createShip(data.x, data.y, data.id);
+      createShip(data.x, data.y, data.id, ship.rot);
       sendPosition();
       break;
     case POSITION:
@@ -52,9 +53,9 @@ socket.addEventListener('message', (event) => {
     case BULLET:
       addEnemyBullet(data);
       break;
-    case POSITION:
-      players[data.id].rotation = data.rotation;
-      break;
+    // case POSITION:
+    //   players[data.id].rotation = data.rotation;
+    //   break;
     default:
       console.warn('Unknown signal:', data.type);
   }
@@ -77,16 +78,17 @@ function updatePosition(data) {
   if (!player) {
     createShip(data.x, data.y, data.id);
   } else {
-    player.rotation = data.rotation;
-    player.x = data.x;
-    player.y = data.y;
+    player.rotation ??= data.rotation;
+    player.x ??= data.x;
+    player.y ??= data.y;
   }
 }
 
-function createShip(x, y, id) {
+function createShip(x, y, id, rotation = 0) {
   let ship = kontra.Sprite({
     x,
     y,
+    rotation,
     color: 'blue',
     width: 20,
     height: 20,
@@ -168,7 +170,13 @@ function sendPosition() {
   });
 }
 
-function socketSend(data) {
+async function socketSend(data) {
+  if (socket.readyState != WebSocket.OPEN) {
+    socket = new WebSocket(WS_URI);
+    while (socket.readyState != WebSocket.OPEN) {
+      await new Promise((r) => setTimeout(r, 20));
+    }
+  }
   socket.send(JSON.stringify(data));
 }
 
