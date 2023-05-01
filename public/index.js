@@ -184,30 +184,33 @@ var loop = kontra.GameLoop({
     let pointer = kontra.getPointer();
     timeElapsed += delta;
 
-    if (kontra.keyPressed('w')) {
-      if (ship.y > 10) ship.y -= speed;
-      sendPosition();
-    }
-    if (kontra.keyPressed('s')) {
-      if (ship.y < canvas.height - 10) ship.y += speed;
-      sendPosition();
-    }
-    if (kontra.keyPressed('d')) {
-      if (ship.x < canvas.width - 10) ship.x += speed;
-      sendPosition();
-    }
-    if (kontra.keyPressed('a')) {
-      if (ship.x > 10) ship.x -= speed;
-      sendPosition();
-    }
+    // Disable controls while typing in username
+    if (document.activeElement != usernameInput) {
+      if (kontra.keyPressed('w')) {
+        if (ship.y > 10) ship.y -= speed;
+        sendPosition();
+      }
+      if (kontra.keyPressed('s')) {
+        if (ship.y < canvas.height - 10) ship.y += speed;
+        sendPosition();
+      }
+      if (kontra.keyPressed('d')) {
+        if (ship.x < canvas.width - 10) ship.x += speed;
+        sendPosition();
+      }
+      if (kontra.keyPressed('a')) {
+        if (ship.x > 10) ship.x -= speed;
+        sendPosition();
+      }
 
-    if (kontra.keyPressed('space') || kontra.pointerPressed('left')) {
-      if (!shootCD) {
-        shoot();
-        setTimeout(() => {
-          shootCD = false;
-        }, 250);
-        shootCD = true;
+      if (kontra.keyPressed('space') || kontra.pointerPressed('left')) {
+        if (!shootCD) {
+          shoot();
+          setTimeout(() => {
+            shootCD = false;
+          }, 250);
+          shootCD = true;
+        }
       }
     }
 
@@ -286,8 +289,9 @@ function outsideCanvas(x, y) {
   return x < 0 || x > canvas.width || y < 0 || y > canvas.height;
 }
 
+let usernameInput = document.getElementById('username');
 function setUsername() {
-  let usernameInput = document.getElementById('username');
   localStorage.setItem('username', usernameInput.value);
   username = usernameInput.value;
+  canvas.focus();
 }
